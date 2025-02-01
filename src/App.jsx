@@ -1,7 +1,7 @@
 import Speedtest from './Speedtest'
 import speedtestLogo from './assets/speedtest.svg'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import help from './assets/help.svg'
+import account from './assets/account.svg'
 import './App.css'
 
 function App() {
@@ -22,14 +22,13 @@ function App() {
           <a href="#" className="text-gray-300 hover:text-blue-300">About</a>
         </div>
         <div className="flex space-x-2">
-          <img src={viteLogo} alt="vite logo" className="h-8 w-8" />
-          <img src={reactLogo} alt="react logo" className="h-8 w-8" />
+          <img src={help} alt="vite logo" className="h-6 w-4" />
+          <img src={account} alt="react logo" className="h-6 w-4" />
         </div>
       </nav>
 
-      <div className="App">
-        <Speedtest />
-      </div>
+      <Speedtest />
+
     </>
   )
 }
