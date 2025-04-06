@@ -4,77 +4,65 @@ function Speedtest() {
   const [ping, setPing] = useState('--');
   const [download, setDownload] = useState('--');
   const [upload, setUpload] = useState('--');
-
-  useEffect(() => {
-    const controller = new AbortController();
-    return () => controller.abort();
-  }, []);
+  const [testing, setTesting] = useState(false);
 
   const runSpeedTest = async () => {
-    setPing('Testing...');
-    setDownload('Testing...');
-    setUpload('Testing...');
+   
 
     try {
-      const pingStart = performance.now();
-      await fetch('https://www.google.com', { method: 'HEAD', mode: 'no-cors' });
-      const pingTime = Math.round(performance.now() - pingStart);
-      setPing(`${pingTime} ms`);
-    } catch {
+      setTesting(true);
+      setPing('Testing..');
+      setDownload('Testing..');
+      setUpload('Testing..');
+      
+      const response = await fetch('http://localhost:3000/speedtest');
+      const data = await response.json();
+      
+      console.log("Speed Test Result:", data);
+      setPing(data.pingResult.latency);
+      setDownload(data.downloadResult.speed);
+      setUpload(data.uploadResult.speed);
+  
+    } catch (error) {
+      console.error("Error:", error);
       setPing('Error');
-    }
-
-    try {
-      const startTime = performance.now();
-      const response = await fetch(
-        'https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js', 
-        { cache: 'no-store' }
-      );
-      const blob = await response.blob();
-      const endTime = performance.now();
-      const fileSizeInBits = blob.size * 8;
-      const durationInSeconds = (endTime - startTime) / 1000;
-      const speedMbps = ((fileSizeInBits / 1000000) / durationInSeconds).toFixed(2);
-      setDownload(`${speedMbps} Mbps`);
-    } catch {
       setDownload('Error');
-    }
-    try {
-      const blob = new Blob([new ArrayBuffer(1024*1024)]);
-      const startTime = performance.now();
-      await fetch('https://httpbin.org/post', {
-        method: 'POST',
-        body: blob
-      });
-      const endTime = performance.now();
-      const fileSizeInBits = blob.size * 8;
-      const speedMbps = (fileSizeInBits / (endTime - startTime) / 1000).toFixed(2);
-      setUpload(`${speedMbps} Mbps`);
-    } catch (e) {
       setUpload('Error');
+    } finally {
+      setTesting(false);
     }
   };
 
   return (
     <div className="flex flex-col items-center justify-center gap-4 mt-20">
-      <div className="flex flex-row items-center justify-center gap-36">
-        <div className=" bg-gray-800 p-8 rounded-lg">
-          <h3 className='font-bold text-xl'>PING</h3>
-          <p>{ping}</p>
+      <div className="flex flex-row items-center justify-center gap-8 md:gap-16 lg:gap-36 flex-wrap">
+        <div className="bg-gray-800 p-8 rounded-lg text-center min-w-48">
+          <h3 className="font-bold text-xl mb-2">PING</h3>
+          <p className="text-2xl">{ping} ms</p>
         </div>
-        <div className="bg-gray-800 p-8 rounded-lg">
-          <h3 className='font-bold text-xl'>Download</h3>
-          <p>{download}</p>
+        <div className="bg-gray-800 p-8 rounded-lg text-center min-w-48">
+          <h3 className="font-bold text-xl mb-2">DOWNLOAD</h3>
+          <p className="text-2xl">{download} mbps</p>
         </div>
-        <div className="bg-gray-800 p-8 rounded-lg">
-          <h3 className='font-bold text-xl'>Upload</h3>
-          <p>{upload}</p>
+        <div className="bg-gray-800 p-8 rounded-lg text-center min-w-48">
+          <h3 className="font-bold text-xl mb-2">UPLOAD</h3>
+          <p className="text-2xl">{upload} mbps</p>
         </div>
       </div>
       <br />
 
-      <button className='bg-blue-500 text-white rounded-2xl p-6' onClick={runSpeedTest}>Start Speed Test</button>
+      <button 
+        className={`${testing ? 'bg-gray-500' : 'bg-blue-500 hover:bg-blue-600'} text-white rounded-2xl p-6 font-bold transition-colors`} 
+        onClick={runSpeedTest}
+        disabled={testing}
+      >
+        {testing ? 'Test on Progress...' : 'Start Speed Test'}
+      </button>
 
+      
+      <p className="text-sm text-gray-500 mt-4 max-w-lg text-center">
+        This test uses 'Universal Speedtest' to do your connection speedtest.
+      </p>
     </div>
   );
 }
